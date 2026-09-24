@@ -4,3 +4,23 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+tokio = { version = "1", features = [
+    "macros",
+    "rt-multi-thread",
+    "process",
+    "sync",
+    "time",
+    "fs",
+] }
+
+quick-xml = "0.42.0"
+
+serde = { version = "1", features = ["derive"] }
+toml = "1.1.6+spec-1.1.0"
+
+thiserror = "2"
+
+tracing = "0.1"
+tracing-subscriber = { version = "0.3",features = ["env-filter"]}
+
+uuid = { version = "1",features = ["v4"]}

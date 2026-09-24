@@ -1,0 +1,23 @@
+[system]
+
+# Đường dẫn adb.
+# Nếu adb nằm trong PATH thì chỉ cần "adb".
+adb_path = "adb"
+
+# Tự động phát hiện thiết bị
+auto_discovery = true
+
+# Bao lâu scan adb devices một lần
+device_poll_interval_ms = 2000
+
+# Số lượng device tối đa chạy đồng thời
+max_concurrent_devices = 3
+
+# Timeout mặc định cho action
+action_timeout_seconds = 30
+
+# Số lần retry
+retry_count = 3
+
+# Kích thước queue của mỗi worker
+worker_queue_size = 20
