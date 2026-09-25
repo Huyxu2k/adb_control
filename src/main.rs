@@ -92,6 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         task_receiver,
         device_manager.clone(),
         worker_manager.clone(),
+        config.system.max_concurrent_devices
     );
 
     tokio::spawn(scheduler.run());

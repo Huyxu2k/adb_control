@@ -1,35 +1,29 @@
-use std::sync::{
-    Arc,
-    atomic::{AtomicBool, Ordering},
-};
-
-use tokio::sync::mpsc::Receiver;
+use tokio::sync::{mpsc::Receiver, oneshot};
 
 use crate::{
     action::{ActionExecutor, Task},
     device::DeviceController,
 };
 
+use crate::error::Result;
+
+pub struct WorkerJob {
+    pub task: Task,
+    pub completion: oneshot::Sender<Result<()>>,
+}
+
 pub struct DeviceWorker {
     controller: DeviceController,
 
-    receiver: Receiver<Task>,
-
-    busy: Arc<AtomicBool>,
+    receiver: Receiver<WorkerJob>,
 }
 
 impl DeviceWorker {
-    pub fn new(
-        controller: DeviceController,
-        receiver: Receiver<Task>,
-        busy: Arc<AtomicBool>,
-    ) -> Self {
+    pub fn new(controller: DeviceController, receiver: Receiver<WorkerJob>) -> Self {
         Self {
             controller,
 
             receiver,
-
-            busy,
         }
     }
 
@@ -38,27 +32,22 @@ impl DeviceWorker {
 
         tracing::info!(device = self.controller.serial(), "worker started");
 
-        while let Some(task) = self.receiver.recv().await {
-            self.busy.store(true, Ordering::SeqCst);
-
-            let task_name = task.name.clone();
-
-            let task_id = task.id.clone();
+        while let Some(job) = self.receiver.recv().await {
+            let task = job.task;
 
             tracing::info!(
                 device = self.controller.serial(),
-                task = %task_name,
-                task_id = %task_id,
+                task = %task.name,
+                task_id = %task.id,
                 "worker executing task"
             );
-
             let result = executor.execute_task(&task).await;
-
-            match result {
+            match &result {
                 Ok(_) => {
                     tracing::info!(
                         device = self.controller.serial(),
-                        task = %task_name,
+                        task = %task.name,
+                        task_id = %task.id,
                         "task completed"
                     );
                 }
@@ -66,14 +55,14 @@ impl DeviceWorker {
                 Err(error) => {
                     tracing::error!(
                         device = self.controller.serial(),
-                        task = %task_name,
+                        task = %task.name,
+                        task_id = %task.id,
                         error = %error,
                         "task failed"
                     );
                 }
             }
-
-            self.busy.store(false, Ordering::SeqCst);
+            let _ = job.completion.send(result);
         }
 
         tracing::info!(device = self.controller.serial(), "worker stopped");

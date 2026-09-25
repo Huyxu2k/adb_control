@@ -2,10 +2,7 @@ mod manager;
 mod scheduler;
 mod worker;
 
-pub use manager::{
-    WorkerHandle,
-    WorkerManager,
-};
+pub use manager::WorkerManager;
 
 pub use scheduler::Scheduler;
 

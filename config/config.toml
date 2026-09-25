@@ -8,7 +8,7 @@ adb_path = "adb"
 auto_discovery = true
 
 # Bao lâu scan adb devices một lần
-device_poll_interval_ms = 2000
+device_poll_interval_ms = 5000
 
 # Số lượng device tối đa chạy đồng thời
 max_concurrent_devices = 3
