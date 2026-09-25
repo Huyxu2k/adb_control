@@ -1,7 +1,4 @@
-use crate::{
-    adb::AdbClient,
-    error::Result,
-};
+use crate::{adb::AdbClient, error::Result};
 
 #[derive(Clone)]
 pub struct DeviceController {
@@ -10,10 +7,7 @@ pub struct DeviceController {
 }
 
 impl DeviceController {
-    pub fn new(
-        adb: AdbClient,
-        serial: impl Into<String>,
-    ) -> Self {
+    pub fn new(adb: AdbClient, serial: impl Into<String>) -> Self {
         Self {
             adb,
             serial: serial.into(),
@@ -28,33 +22,19 @@ impl DeviceController {
     // BASIC SHELL
     // --------------------------------------------------
 
-    pub async fn shell(
-        &self,
-        command: &str,
-    ) -> Result<String> {
-        self.adb
-            .shell(&self.serial, command)
-            .await
+    pub async fn shell(&self, command: &str) -> Result<String> {
+        self.adb.shell(&self.serial, command).await
     }
 
     // --------------------------------------------------
     // TOUCH
     // --------------------------------------------------
 
-    pub async fn tap(
-        &self,
-        x: i32,
-        y: i32,
-    ) -> Result<()> {
+    pub async fn tap(&self, x: i32, y: i32) -> Result<()> {
         self.adb
             .shell_args(
                 &self.serial,
-                &[
-                    "input",
-                    "tap",
-                    &x.to_string(),
-                    &y.to_string(),
-                ],
+                &["input", "tap", &x.to_string(), &y.to_string()],
             )
             .await?;
 
@@ -65,14 +45,7 @@ impl DeviceController {
     // SWIPE
     // --------------------------------------------------
 
-    pub async fn swipe(
-        &self,
-        x1: i32,
-        y1: i32,
-        x2: i32,
-        y2: i32,
-        duration_ms: u64,
-    ) -> Result<()> {
+    pub async fn swipe(&self, x1: i32, y1: i32, x2: i32, y2: i32, duration_ms: u64) -> Result<()> {
         self.adb
             .shell_args(
                 &self.serial,
@@ -95,21 +68,11 @@ impl DeviceController {
     // TEXT
     // --------------------------------------------------
 
-    pub async fn input_text(
-        &self,
-        text: &str,
-    ) -> Result<()> {
+    pub async fn input_text(&self, text: &str) -> Result<()> {
         let escaped = escape_adb_input_text(text);
 
         self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "input",
-                    "text",
-                    &escaped,
-                ],
-            )
+            .shell_args(&self.serial, &["input", "text", &escaped])
             .await?;
 
         Ok(())
@@ -121,14 +84,7 @@ impl DeviceController {
 
     pub async fn back(&self) -> Result<()> {
         self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "input",
-                    "keyevent",
-                    "4",
-                ],
-            )
+            .shell_args(&self.serial, &["input", "keyevent", "4"])
             .await?;
 
         Ok(())
@@ -136,14 +92,7 @@ impl DeviceController {
 
     pub async fn home(&self) -> Result<()> {
         self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "input",
-                    "keyevent",
-                    "3",
-                ],
-            )
+            .shell_args(&self.serial, &["input", "keyevent", "3"])
             .await?;
 
         Ok(())
@@ -153,10 +102,7 @@ impl DeviceController {
     // APP
     // --------------------------------------------------
 
-    pub async fn launch_app(
-        &self,
-        package: &str,
-    ) -> Result<()> {
+    pub async fn launch_app(&self, package: &str) -> Result<()> {
         self.adb
             .shell_args(
                 &self.serial,
@@ -178,18 +124,9 @@ impl DeviceController {
     // SCREENSHOT
     // --------------------------------------------------
 
-    pub async fn screenshot(
-        &self,
-    ) -> Result<Vec<u8>> {
+    pub async fn screenshot(&self) -> Result<Vec<u8>> {
         self.adb
-            .exec(
-                &self.serial,
-                &[
-                    "exec-out",
-                    "screencap",
-                    "-p",
-                ],
-            )
+            .exec(&self.serial, &["exec-out", "screencap", "-p"])
             .await
     }
 
@@ -197,28 +134,14 @@ impl DeviceController {
     // UI DUMP
     // --------------------------------------------------
 
-    pub async fn dump_ui(
-        &self,
-    ) -> Result<String> {
+    pub async fn dump_ui(&self) -> Result<String> {
         self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "uiautomator",
-                    "dump",
-                    "/sdcard/window.xml",
-                ],
-            )
+            .shell_args(&self.serial, &["uiautomator", "dump", "/sdcard/window.xml"])
             .await?;
 
-        let xml = self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "cat",
-                    "/sdcard/window.xml",
-                ],
-            )
+        let xml = self
+            .adb
+            .shell_args(&self.serial, &["cat", "/sdcard/window.xml"])
             .await?;
 
         Ok(xml)
@@ -228,10 +151,7 @@ impl DeviceController {
     // VOLUME
     // --------------------------------------------------
 
-    pub async fn set_volume(
-        &self,
-        value: u8,
-    ) -> Result<()> {
+    pub async fn set_volume(&self, value: u8) -> Result<()> {
         self.adb
             .shell_args(
                 &self.serial,
@@ -252,14 +172,7 @@ impl DeviceController {
 
     pub async fn mute(&self) -> Result<()> {
         self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "input",
-                    "keyevent",
-                    "KEYCODE_VOLUME_MUTE",
-                ],
-            )
+            .shell_args(&self.serial, &["input", "keyevent", "KEYCODE_VOLUME_MUTE"])
             .await?;
 
         Ok(())
@@ -271,14 +184,7 @@ impl DeviceController {
 
     pub async fn wifi_enable(&self) -> Result<()> {
         self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "svc",
-                    "wifi",
-                    "enable",
-                ],
-            )
+            .shell_args(&self.serial, &["svc", "wifi", "enable"])
             .await?;
 
         Ok(())
@@ -286,25 +192,15 @@ impl DeviceController {
 
     pub async fn wifi_disable(&self) -> Result<()> {
         self.adb
-            .shell_args(
-                &self.serial,
-                &[
-                    "svc",
-                    "wifi",
-                    "disable",
-                ],
-            )
+            .shell_args(&self.serial, &["svc", "wifi", "disable"])
             .await?;
 
         Ok(())
     }
 }
 
-fn escape_adb_input_text(
-    text: &str,
-) -> String {
-    text
-        .replace(' ', "%s")
+fn escape_adb_input_text(text: &str) -> String {
+    text.replace(' ', "%s")
         .replace('&', "\\&")
         .replace('|', "\\|")
         .replace('<', "\\<")

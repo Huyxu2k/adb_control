@@ -12,22 +12,13 @@ pub enum DeviceSelector {
 }
 
 impl DeviceSelector {
-    pub fn matches(
-        &self,
-        serial: &str,
-    ) -> bool {
+    pub fn matches(&self, serial: &str) -> bool {
         match self {
             Self::Any => true,
 
-            Self::Device(target) => {
-                target == serial
-            }
+            Self::Device(target) => target == serial,
 
-            Self::Devices(targets) => {
-                targets
-                    .iter()
-                    .any(|target| target == serial)
-            }
+            Self::Devices(targets) => targets.iter().any(|target| target == serial),
         }
     }
 }
@@ -44,11 +35,7 @@ pub struct Task {
 }
 
 impl Task {
-    pub fn new(
-        name: impl Into<String>,
-        selector: DeviceSelector,
-        actions: Vec<Action>,
-    ) -> Self {
+    pub fn new(name: impl Into<String>, selector: DeviceSelector, actions: Vec<Action>) -> Self {
         Self {
             id: Uuid::new_v4().to_string(),
 

@@ -2,15 +2,9 @@ use std::collections::HashMap;
 
 use tokio::sync::RwLock;
 
-use crate::{
-    adb::AdbClient,
-    error::Result,
-};
+use crate::{adb::AdbClient, error::Result};
 
-use super::{
-    AndroidDevice,
-    DeviceState,
-};
+use super::{AndroidDevice, DeviceState};
 
 pub struct DeviceManager {
     adb: AdbClient,
@@ -23,9 +17,7 @@ impl DeviceManager {
         Self {
             adb,
 
-            devices: RwLock::new(
-                HashMap::new()
-            ),
+            devices: RwLock::new(HashMap::new()),
         }
     }
 
@@ -40,67 +32,40 @@ impl DeviceManager {
             .collect::<std::collections::HashSet<_>>();
 
         for info in adb_devices {
-            let state =
-                DeviceState::from_adb_state(&info.state);
+            let state = DeviceState::from_adb_state(&info.state);
 
             devices
                 .entry(info.serial.clone())
                 .and_modify(|device| {
                     device.state = state;
                 })
-                .or_insert_with(|| {
-                    AndroidDevice::new(
-                        info.serial,
-                        state,
-                    )
-                });
+                .or_insert_with(|| AndroidDevice::new(info.serial, state));
         }
 
-        devices.retain(|serial, _| {
-            current_serials.contains(serial)
-        });
+        devices.retain(|serial, _| current_serials.contains(serial));
 
         Ok(())
     }
 
     pub async fn list(&self) -> Vec<AndroidDevice> {
+        self.devices.read().await.values().cloned().collect()
+    }
+
+    pub async fn online_devices(&self) -> Vec<AndroidDevice> {
         self.devices
             .read()
             .await
             .values()
+            .filter(|device| device.state == DeviceState::Online)
             .cloned()
             .collect()
     }
 
-    pub async fn online_devices(
-        &self,
-    ) -> Vec<AndroidDevice> {
-        self.devices
-            .read()
-            .await
-            .values()
-            .filter(|device| {
-                device.state == DeviceState::Online
-            })
-            .cloned()
-            .collect()
+    pub async fn get(&self, serial: &str) -> Option<AndroidDevice> {
+        self.devices.read().await.get(serial).cloned()
     }
 
-    pub async fn get(
-        &self,
-        serial: &str,
-    ) -> Option<AndroidDevice> {
-        self.devices
-            .read()
-            .await
-            .get(serial)
-            .cloned()
-    }
-
-    pub async fn is_online(
-        &self,
-        serial: &str,
-    ) -> bool {
+    pub async fn is_online(&self, serial: &str) -> bool {
         self.devices
             .read()
             .await

@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DeviceState {
     Unknown,
@@ -25,10 +24,7 @@ pub struct AndroidDevice {
 }
 
 impl AndroidDevice {
-    pub fn new(
-        serial: impl Into<String>,
-        state: DeviceState,
-    ) -> Self {
+    pub fn new(serial: impl Into<String>, state: DeviceState) -> Self {
         Self {
             serial: serial.into(),
             state,

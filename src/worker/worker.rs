@@ -1,20 +1,12 @@
 use std::sync::{
-    atomic::{
-        AtomicBool,
-        Ordering,
-    },
     Arc,
+    atomic::{AtomicBool, Ordering},
 };
 
-use tokio::sync::mpsc::{
-    Receiver,
-};
+use tokio::sync::mpsc::Receiver;
 
 use crate::{
-    action::{
-        ActionExecutor,
-        Task,
-    },
+    action::{ActionExecutor, Task},
     device::DeviceController,
 };
 
@@ -41,33 +33,17 @@ impl DeviceWorker {
         }
     }
 
-    pub async fn run(
-        mut self,
-    ) {
-        let executor =
-            ActionExecutor::new(
-                self.controller.clone()
-            );
+    pub async fn run(mut self) {
+        let executor = ActionExecutor::new(self.controller.clone());
 
-        tracing::info!(
-            device = self.controller.serial(),
-            "worker started"
-        );
+        tracing::info!(device = self.controller.serial(), "worker started");
 
-        while let Some(task) =
-            self.receiver.recv().await
-        {
-            self.busy
-                .store(
-                    true,
-                    Ordering::SeqCst
-                );
+        while let Some(task) = self.receiver.recv().await {
+            self.busy.store(true, Ordering::SeqCst);
 
-            let task_name =
-                task.name.clone();
+            let task_name = task.name.clone();
 
-            let task_id =
-                task.id.clone();
+            let task_id = task.id.clone();
 
             tracing::info!(
                 device = self.controller.serial(),
@@ -76,10 +52,7 @@ impl DeviceWorker {
                 "worker executing task"
             );
 
-            let result =
-                executor
-                    .execute_task(&task)
-                    .await;
+            let result = executor.execute_task(&task).await;
 
             match result {
                 Ok(_) => {
@@ -100,16 +73,9 @@ impl DeviceWorker {
                 }
             }
 
-            self.busy
-                .store(
-                    false,
-                    Ordering::SeqCst
-                );
+            self.busy.store(false, Ordering::SeqCst);
         }
 
-        tracing::info!(
-            device = self.controller.serial(),
-            "worker stopped"
-        );
+        tracing::info!(device = self.controller.serial(), "worker stopped");
     }
 }

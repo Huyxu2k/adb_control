@@ -28,8 +28,7 @@ impl AppConfig {
     pub async fn load(path: &str) -> Result<Self> {
         let content = tokio::fs::read_to_string(path).await?;
 
-        let config: Self = toml::from_str(&content)
-            .map_err(|e| AppError::Config(e.to_string()))?;
+        let config: Self = toml::from_str(&content).map_err(|e| AppError::Config(e.to_string()))?;
 
         Ok(config)
     }

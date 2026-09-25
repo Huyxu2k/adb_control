@@ -21,10 +21,7 @@ pub fn parse_devices_output(output: &str) -> Vec<AdbDeviceInfo> {
 
             let state = parts.next()?.to_string();
 
-            Some(AdbDeviceInfo {
-                serial,
-                state,
-            })
+            Some(AdbDeviceInfo { serial, state })
         })
         .collect()
 }

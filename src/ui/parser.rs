@@ -30,9 +30,11 @@ impl UiParser {
                         for attr in event.attributes() {
                             let attr = attr.map_err(|e| AppError::UiParse(e.to_string()))?;
 
-                            let key = String::from_utf8_lossy(attr.key.as_ref().as_bytes()).to_string();
+                            let key =
+                                String::from_utf8_lossy(attr.key.as_ref().as_bytes()).to_string();
 
-                            let value = String::from_utf8_lossy(attr.value.as_ref().as_bytes()).to_string();
+                            let value =
+                                String::from_utf8_lossy(attr.value.as_ref().as_bytes()).to_string();
 
                             match key.as_str() {
                                 "index" => {

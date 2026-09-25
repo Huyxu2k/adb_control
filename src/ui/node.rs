@@ -10,10 +10,7 @@ pub struct Bounds {
 
 impl Bounds {
     pub fn center(&self) -> (i32, i32) {
-        (
-            (self.left + self.right) / 2,
-            (self.top + self.bottom) / 2,
-        )
+        ((self.left + self.right) / 2, (self.top + self.bottom) / 2)
     }
 
     pub fn width(&self) -> i32 {
@@ -58,27 +55,15 @@ pub struct UiTree {
 }
 
 impl UiTree {
-    pub fn new(
-        nodes: Vec<UiNode>,
-    ) -> Self {
-        Self {
-            nodes,
-        }
+    pub fn new(nodes: Vec<UiNode>) -> Self {
+        Self { nodes }
     }
 
-    pub fn find(
-        &self,
-        selector: &Selector,
-    ) -> Option<&UiNode> {
-        self.nodes
-            .iter()
-            .find(|node| selector.matches(node))
+    pub fn find(&self, selector: &Selector) -> Option<&UiNode> {
+        self.nodes.iter().find(|node| selector.matches(node))
     }
 
-    pub fn find_all(
-        &self,
-        selector: &Selector,
-    ) -> Vec<&UiNode> {
+    pub fn find_all(&self, selector: &Selector) -> Vec<&UiNode> {
         self.nodes
             .iter()
             .filter(|node| selector.matches(node))
